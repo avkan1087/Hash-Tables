@@ -1,8 +1,4 @@
 class HashTableEntry:
-    """
-    Hash Table entry, as a linked list node.
-    """
-
     def __init__(self, key, value):
         self.key = key
         self.value = value
@@ -10,69 +6,80 @@ class HashTableEntry:
 
 
 class HashTable:
-    """
-    A hash table that with `capacity` buckets
-    that accepts string keys
+    def __init__(self, capacity):
+        self.capacity = capacity
+        self.storage = [None] * self.capacity
 
-    Implement this.
-    """
-
-    def fnv1(self, key):
-        """
-        FNV-1 64-bit hash function
-
-        Implement this, and/or DJB2.
-        """
-
+    # def fnv1(self, key):
     def djb2(self, key):
-        """
-        DJB2 32-bit hash function
+        hash = 5381
+        for x in key:
+            hash = (hash * 33) + ord(x)
 
-        Implement this, and/or FNV-1.
-        """
+        return hash & 0xFFFFFFFF
 
     def hash_index(self, key):
-        """
-        Take an arbitrary key and return a valid integer index
-        between within the storage capacity of the hash table.
-        """
-        #return self.fnv1(key) % self.capacity
         return self.djb2(key) % self.capacity
 
     def put(self, key, value):
-        """
-        Store the value with the given key.
 
-        Hash collisions should be handled with Linked List Chaining.
+        index = self.hash_index(key)
+        current_node = self.storage[index]
 
-        Implement this.
-        """
+        if not current_node:
+            self.storage[index] = HashTableEntry(key, value)
+            return
+
+        while current_node:
+            if current_node.key == key:
+                current_node.value = value
+                return
+            elif not current_node.next:
+                current_node.next = HashTableEntry(key, value)
+                return
+            else:
+                current_node = current_node.next
 
     def delete(self, key):
-        """
-        Remove the value stored with the given key.
 
-        Print a warning if the key is not found.
+        index = self.hash_index(key)
+        current_node = self.storage[index]
 
-        Implement this.
-        """
+        if current_node.key == key:
+            self.storage[index] = current_node.next
+            current_node.next = None
+            return
+
+        while current_node.next:
+            if current_node.next.key == key:
+                delete_node = current_node.next
+                current_node.next = delete_node.next
+                delete_node.next = None
+                return
+            else:
+                current_node = current_node.next
+        return print('Warning: Key is not found')
 
     def get(self, key):
-        """
-        Retrieve the value stored with the given key.
 
-        Returns None if the key is not found.
+        index = self.hash_index(key)
+        current_node = self.storage[index]
 
-        Implement this.
-        """
+        while current_node is not None:
+            if current_node.key == key:
+                return current_node.value
+            else:
+                current_node = current_node.next
+
+        return None
 
     def resize(self):
         """
         Doubles the capacity of the hash table and
         rehash all key/value pairs.
-
         Implement this.
         """
+
 
 if __name__ == "__main__":
     ht = HashTable(2)
